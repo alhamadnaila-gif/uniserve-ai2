@@ -1,46 +1,179 @@
-# Getting Started with Create React App
+# UNSER1 Backend API
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Complete backend solution for the UNSER1 University Management System with AI consultation, education, and marketplace features.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+- **Authentication**: User registration, login, and profile management
+- **Consultation Services**: AI-powered consultations in business, technology, healthcare, and legal fields
+- **Education System**: Course enrollment, reviews, and management
+- **Marketplace**: Buy/sell items with reviews and ratings
+- **Real-time Chat**: WebSocket support for live consultations
+- **Security**: JWT authentication, rate limiting, input validation
 
-### `npm start`
+## Tech Stack
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- **Node.js** - Runtime environment
+- **Express.js** - Web framework
+- **MongoDB** - Database with Mongoose ODM
+- **Socket.io** - Real-time communication
+- **JWT** - Authentication
+- **bcryptjs** - Password hashing
+- **express-validator** - Input validation
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Installation
 
-### `npm test`
+1. Install dependencies:
+```bash
+npm install
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+2. Set up environment variables:
+```bash
+cp .env.example .env
+```
 
-### `npm run build`
+Edit `.env` with your configuration:
+```
+PORT=5000
+MONGODB_URI=mongodb://localhost:27017/unser1
+JWT_SECRET=your_jwt_secret_key_here_change_in_production
+JWT_EXPIRE=7d
+NODE_ENV=development
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+3. Start MongoDB (make sure it's running on your system)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+4. Start the server:
+```bash
+# Development mode
+npm run dev
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+# Production mode
+npm start
+```
 
-### `npm run eject`
+The server will run on `http://localhost:5000`
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## API Endpoints
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Authentication
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/login` - User login
+- `GET /api/auth/me` - Get current user profile
+- `PUT /api/auth/profile` - Update user profile
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+### Consultation
+- `POST /api/consultation/start` - Start new consultation
+- `GET /api/consultation/my-consultations` - Get user's consultations
+- `GET /api/consultation/:id` - Get specific consultation
+- `POST /api/consultation/:id/message` - Send message
+- `PUT /api/consultation/:id/complete` - Complete consultation
+- `DELETE /api/consultation/:id` - Cancel consultation
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+### Education
+- `GET /api/education/courses` - Get all courses
+- `GET /api/education/courses/:id` - Get specific course
+- `POST /api/education/courses/:id/enroll` - Enroll in course
+- `GET /api/education/my-courses` - Get user's enrolled courses
+- `POST /api/education/courses/:id/review` - Review course
+- `GET /api/education/categories` - Get course categories
 
-## Learn More
+### Marketplace
+- `GET /api/marketplace/items` - Get marketplace items
+- `GET /api/marketplace/items/:id` - Get specific item
+- `POST /api/marketplace/items` - Create new item
+- `PUT /api/marketplace/items/:id` - Update item
+- `POST /api/marketplace/items/:id/like` - Like/unlike item
+- `POST /api/marketplace/items/:id/review` - Review item
+- `GET /api/marketplace/my-items` - Get user's items
+- `DELETE /api/marketplace/items/:id` - Delete item
+- `GET /api/marketplace/categories` - Get item categories
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Users
+- `GET /api/users/profile` - Get user profile
+- `GET /api/users/search` - Search users
+- `GET /api/users/:id` - Get specific user
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## WebSocket Events
+
+### Client to Server
+- `join-consultation` - Join consultation room
+- `send-message` - Send chat message
+
+### Server to Client
+- `receive-message` - Receive chat message
+
+## Database Models
+
+### User
+- username, email, password
+- firstName, lastName, avatar
+- role (student/instructor/admin)
+- enrolledCourses, consultations
+
+### Consultation
+- user, field, title, status
+- messages (sender, content, timestamp)
+- startTime, endTime, rating, feedback
+
+### Course
+- title, description, category
+- price, duration, location
+- instructor, enrolledStudents
+- rating, reviews, tags
+
+### MarketplaceItem
+- title, description, category, price
+- seller, images, condition
+- availability, views, likes
+- reviews, tags
+
+## Security Features
+
+- JWT authentication with expiration
+- Password hashing with bcryptjs
+- Rate limiting (100 requests per 15 minutes)
+- Input validation and sanitization
+- CORS configuration
+- Helmet for security headers
+
+## Error Handling
+
+All endpoints return consistent error responses:
+```json
+{
+  "message": "Error description",
+  "errors": [] // Validation errors (if applicable)
+}
+```
+
+## Development
+
+### Adding New Routes
+1. Create model in `models/` directory
+2. Create route file in `routes/` directory
+3. Add route to `server.js`
+4. Add authentication middleware if needed
+
+### Database Seeding
+You can create a seed script to populate the database with initial data:
+```javascript
+// scripts/seed.js
+const User = require('../models/User');
+const Course = require('../models/Course');
+// ... add seed data
+```
+
+## Production Deployment
+
+1. Set `NODE_ENV=production`
+2. Use a secure JWT secret
+3. Configure MongoDB with authentication
+4. Set up reverse proxy (nginx)
+5. Enable HTTPS
+6. Configure environment variables properly
+
+## License
+
+MIT License
